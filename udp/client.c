@@ -31,6 +31,7 @@ int connectToServer(char *address, int port)
   serverAddress.sin_family = AF_INET;
   serverAddress.sin_addr.s_addr = inet_addr(address);
   serverAddress.sin_port = htons(port);
+
   return socketFd;
 }
 
@@ -51,9 +52,14 @@ void interactWithServer(int clientFd)
   getchar();
 
   printf("Enviando: %s\n", msg_to_send);
-  sendto(clientFd, (char *)msg_to_send, BUFFER_MAX_SIZE, MSG_CONFIRM, (const struct sockaddr *)&serverAddress, sizeof(serverAddress));
-  sleep(2);
-  int readBytes = recvfrom(clientFd, (char *)server_response, BUFFER_MAX_SIZE, 0, (struct sockaddr *)&serverAddress, sizeof(serverAddress));
+  sendto(clientFd, (char *)msg_to_send, BUFFER_MAX_SIZE, MSG_CONFIRM, (struct sockaddr *)&serverAddress, sizeof(serverAddress));
+
+  printf("Aguardando mensagem...\n");
+  // int readBytes = recvfrom(clientFd, (char *)server_response, BUFFER_MAX_SIZE, MSG_WAITALL, (struct sockaddr *)&serverAddress, (socklen_t *)sizeof(serverAddress));
+  if(recvfrom(clientFd, (char *)server_response, BUFFER_MAX_SIZE, MSG_WAITALL, (struct sockaddr *)&serverAddress, (socklen_t *)sizeof(serverAddress)) < 0){
+    perror("erro ao receber");
+    exit(1);
+  }
   printf("\nMensagem do Servidor: %s\n", server_response);
 }
 
