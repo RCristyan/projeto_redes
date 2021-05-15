@@ -52,13 +52,6 @@ int setupServer(int port){
     return socketFd;
 }
 
-void childStuff(int clientFd){
-    printf("em child stuff\n");
-    printf("Servidor aceitou conexão do cliente\n");
-
-    handleClientConnection(clientFd);  
-}
-
 /**
  * @brief Aguarda por conexão
  * @param socketFd File descriptor do socket do servidor
