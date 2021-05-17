@@ -6,6 +6,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <errno.h>
 
 #define PORT 8080
 #define BUFFER_MAX_SIZE 50
@@ -47,17 +48,62 @@ void interactWithServer(int clientFd){
     char msg_to_send[BUFFER_MAX_SIZE];
     char server_response[BUFFER_MAX_SIZE];
 
+    fd_set readfds;
+    int    num_readable;
+    struct timeval tv;
+    int    num_bytes;
+    char   buf[BUFFER_MAX_SIZE];
+    int    fd_stdin;
+
+    fd_stdin = fileno(stdin);
+
     while(1){
+        FD_ZERO(&readfds);
+        FD_SET(fileno(stdin), &readfds);
+
+        tv.tv_sec = 10;
+        tv.tv_usec = 0;
+
         fseek(stdin, 0, SEEK_END);
         bzero(msg_to_send, sizeof(msg_to_send));
         printf("Digite a mensagem a ser enviada para o servidor:\n> ");
-        scanf("%[^\n]s", msg_to_send);
+        
+        fflush(stdout);
+        num_readable = select(fd_stdin + 1, &readfds, NULL, NULL, &tv);
+        // scanf("%[^\n]s", msg_to_send);
 
-        // descartar '/n' que sobrou
-        getchar();
+        if (num_readable == -1) {
+                fprintf(stderr, "\nError in select : %s\n", strerror(errno));
+                exit(1);
+        }
+        if (num_readable == 0) {
+                printf("\nPerforming default action\n");
+                bzero(server_response, BUFFER_MAX_SIZE);
+                int readBytes = read(clientFd, server_response, sizeof(server_response));
+                printf("Recebidos %d caracteres\n", readBytes);
+                printf("Recebido do servidor: %s\n", server_response);
+                continue;  /* since I don't want to test forever */
+        } else {
+                num_bytes = read(fd_stdin, msg_to_send, BUFFER_MAX_SIZE);
+                if (num_bytes < 0) {
+                        fprintf(stderr, "\nError on read : %s\n", strerror(errno));
+                        exit(1);
+                }
+                /* process command, maybe by sscanf */
+                // printf("\nRead %d bytes\n", num_bytes);
+                // break; /* to terminate loop, since I don't process anything */
 
-        printf("Enviando: %s\n", msg_to_send);
-        write(clientFd, msg_to_send, sizeof(msg_to_send));
+                printf("Enviando: %s\n", msg_to_send);
+                write(clientFd, msg_to_send, sizeof(msg_to_send));
+
+                // bzero(server_response, BUFFER_MAX_SIZE);
+                // int readBytes = read(clientFd, server_response, sizeof(server_response));
+                // printf("Recebidos %d caracteres\n", readBytes);
+                // printf("Recebido do servidor: %s\n", server_response);
+        }
+
+        // printf("Enviando: %s\n", msg_to_send);
+        // write(clientFd, msg_to_send, sizeof(msg_to_send));
 
         bzero(server_response, BUFFER_MAX_SIZE);
         int readBytes = read(clientFd, server_response, sizeof(server_response));
