@@ -61,8 +61,6 @@ int setupServer(int port){
     }
     printf("Servidor escutando na porta %d\n", PORT);
 
-    // iniciando setup de sockets
-
     for(int i = 0; i < MAX_CLIENTS; i++) client_socket[i] = 0;
 
     return socketFd;
@@ -127,7 +125,7 @@ void waitForConnection(int socketFd){
             if(FD_ISSET(sd, &readfds)){
                 // enviar mensagem de volta
                 int readBytes = read(sd, client_msg, sizeof(client_msg));
-                printf("IP: %s, Porta: %u: %s\n", inet_ntoa(clientAddress.sin_addr), ntohs(clientAddress.sin_port), client_msg);
+                printf("IP: %s, Porta: %u: %s", inet_ntoa(clientAddress.sin_addr), ntohs(clientAddress.sin_port), client_msg);
                 
                 // enviar para o cliente
                 for(int i = 0; i < MAX_CLIENTS; i++){
@@ -147,8 +145,6 @@ void waitForConnection(int socketFd){
                 }
             }
         }
-
-        // handleClientConnection(clientFd);
     }
 }
 
