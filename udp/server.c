@@ -49,22 +49,25 @@ int main(){
     int socketFd = setupServer(PORT);
 
     char messageReceived[BUFFER_MAX_SIZE];
-    char message[BUFFER_MAX_SIZE] = "Server Received Message\0";
     struct sockaddr_in clientAdress;
     
     socklen_t cAddressLen = sizeof(clientAdress);
 
-    printf("Esperando mensagem\n");
-    int readBytes = recvfrom(socketFd, messageReceived, BUFFER_MAX_SIZE, 0, ( struct sockaddr *) &clientAdress, &cAddressLen);
+    while(1){
+        printf("Esperando mensagem\n");
+        int readBytes = recvfrom(socketFd, messageReceived, BUFFER_MAX_SIZE, 0, ( struct sockaddr *) &clientAdress, &cAddressLen);
 
-    printf("Received message from IP: %s and port: %i\n",
-           inet_ntoa(clientAdress.sin_addr), ntohs(clientAdress.sin_port));
-    printf("Mensagem recebida: %s\n", messageReceived);
-    
-    printf("\nEnviando mensagem: %s\n", messageReceived);
+        printf("Received message from IP: %s and port: %i\n",
+            inet_ntoa(clientAdress.sin_addr), ntohs(clientAdress.sin_port));
+        printf("Mensagem recebida: %s\n", messageReceived);
+        
+        printf("Enviando mensagem: %s\n", messageReceived);
 
-    int sentBytes = sendto(socketFd, messageReceived, BUFFER_MAX_SIZE, 0, (struct sockaddr *)&clientAdress, cAddressLen);
-    printf("\nMensagem enviada (%d bytes)\n", sentBytes);
+        int sentBytes = sendto(socketFd, messageReceived, BUFFER_MAX_SIZE, 0, (struct sockaddr *)&clientAdress, cAddressLen);
+        printf("Mensagem enviada\n", sentBytes);
+
+        bzero(messageReceived, BUFFER_MAX_SIZE);
+    }
 
     close(socketFd);
 
