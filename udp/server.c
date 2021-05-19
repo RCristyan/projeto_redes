@@ -13,7 +13,6 @@
 
 struct sockaddr_in serverAddress;
 
-
 int setupServer(int port);
 void waitForConnection(int socketFd);
 void handleClientConnection(int clientFd);
@@ -42,7 +41,6 @@ int setupServer(int port){
         exit(1);
     }
     printf("Bind realizado com sucesso\n");
-    // printf("Servidor escutando na porta %d\n", PORT);
 
     return socketFd;
 }
@@ -53,13 +51,11 @@ int main(){
     char messageReceived[BUFFER_MAX_SIZE];
     char message[BUFFER_MAX_SIZE] = "Server Received Message\0";
     struct sockaddr_in clientAdress;
-
-    clientAdress.sin_family = AF_INET;
-    clientAdress.sin_addr.s_addr = htonl(INADDR_ANY);
-    clientAdress.sin_port = htons(PORT);
     
+    socklen_t cAddressLen = sizeof(clientAdress);
+
     printf("Esperando mensagem\n");
-    int readBytes = recvfrom(socketFd, messageReceived, BUFFER_MAX_SIZE, 0, ( struct sockaddr *) &clientAdress, (socklen_t *) sizeof(clientAdress));
+    int readBytes = recvfrom(socketFd, messageReceived, BUFFER_MAX_SIZE, 0, ( struct sockaddr *) &clientAdress, &cAddressLen);
 
     printf("Received message from IP: %s and port: %i\n",
            inet_ntoa(clientAdress.sin_addr), ntohs(clientAdress.sin_port));
@@ -67,8 +63,7 @@ int main(){
     
     printf("\nEnviando mensagem: %s\n", messageReceived);
 
-    int clienteLength = sizeof(clientAdress);
-    int sentBytes = sendto(socketFd, messageReceived, strlen(messageReceived), 0, (struct sockaddr *)&clientAdress, clienteLength);
+    int sentBytes = sendto(socketFd, messageReceived, BUFFER_MAX_SIZE, 0, (struct sockaddr *)&clientAdress, cAddressLen);
     printf("\nMensagem enviada (%d bytes)\n", sentBytes);
 
     close(socketFd);

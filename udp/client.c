@@ -44,19 +44,19 @@ void interactWithServer(int clientFd)
   char msg_to_send[BUFFER_MAX_SIZE];
   char server_response[BUFFER_MAX_SIZE];
 
-  fseek(stdin, 0, SEEK_END);
   bzero(msg_to_send, sizeof(msg_to_send));
   printf("Digite a mensagem a ser enviada para o servidor:\n> ");
   scanf("%[^\n]s", msg_to_send);
 
   getchar();
 
+  socklen_t sAdressLen = sizeof(serverAddress);
+
   printf("Enviando: %s\n", msg_to_send);
-  sendto(clientFd, (char *)msg_to_send, BUFFER_MAX_SIZE, MSG_CONFIRM, (struct sockaddr *)&serverAddress, sizeof(serverAddress));
+  sendto(clientFd, (char *)msg_to_send, BUFFER_MAX_SIZE, 0, (struct sockaddr *)&serverAddress, sAdressLen);
 
   printf("Aguardando mensagem...\n");
-  // int readBytes = recvfrom(clientFd, (char *)server_response, BUFFER_MAX_SIZE, MSG_WAITALL, (struct sockaddr *)&serverAddress, (socklen_t *)sizeof(serverAddress));
-  if(recvfrom(clientFd, (char *)server_response, BUFFER_MAX_SIZE, MSG_WAITALL, (struct sockaddr *)&serverAddress, (socklen_t *)sizeof(serverAddress)) < 0){
+  if(recvfrom(clientFd, (char *)server_response, BUFFER_MAX_SIZE, 0, (struct sockaddr *)&serverAddress, &sAdressLen) < 0){
     perror("erro ao receber");
     exit(1);
   }
@@ -65,7 +65,7 @@ void interactWithServer(int clientFd)
 
 int main()
 {
-  int socket = connectToServer("127.0.0.1", 8080);
+  int socket = connectToServer("127.0.0.1", PORT);
   interactWithServer(socket);
   close(socket);
 
