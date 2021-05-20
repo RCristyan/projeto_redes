@@ -23,6 +23,9 @@ Com o servidor em execução, compile o código do cliente com:
 E inicie o cliente com:
 ``` ./client.o ```
 
+Inicie outros clientes com:
+``` ./client.o ```
+
 O cliente envia uma mensagem, aguarda a resposta e pode enviar outra, e o processo continua em loop. Caso queira finalizar a conexão, ele deve enviar a mensagem exit.
 O servidor recebe a mensagem do cliente, responde e continua em loop, aguardando mais mensgens. Caso receba a mensagem exit, ele fecha a conexão com o cliente e aguarda por uma nova.
 A diferença deste código para o anterior é que este é capaz de tratar mais de 1 cliente simultaneamente. Isso foi possível graças ao uso da chamada de sistema fork().
